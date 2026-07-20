@@ -168,7 +168,7 @@ export default function HomeScreen({ navigation }) {
                 {user?.fullName || "Demo Student"}
               </Text>
               <Text style={styles.drawerEmail}>
-                {user?.email || "student@demo.com"}
+                {user?.email || DEFAULT_USER.email}
               </Text>
             </View>
 
