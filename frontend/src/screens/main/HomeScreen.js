@@ -18,6 +18,7 @@ const MISSIONS = {
   ]
 };
 
+// Main Home screen dashboard displaying user stats, daily missions, and quick access tabs
 export default function HomeScreen({ navigation }) {
   const { language, setLanguage, t } = useLanguage();
   const { user } = useAuth();

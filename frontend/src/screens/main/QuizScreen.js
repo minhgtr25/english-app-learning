@@ -7,6 +7,7 @@ import api from '../../api/client';
 import { demoQuestions } from '../../data/demoData';
 import { useAuth } from '../../state/AuthContext';
 
+// Quiz screen component containing multiple choice question interactive learning logic
 export default function QuizScreen({ route, navigation }) {
   const { category: filterCategory } = route.params || {};
   const { t } = useLanguage();

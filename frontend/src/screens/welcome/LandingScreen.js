@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-na
 import { COLORS } from '../../theme/colors';
 import { useLanguage } from '../../i18n/LanguageContext';
 
+// Welcome landing screen component representing the main entry point of the app
 export default function LandingScreen({ navigation }) {
   const { language, setLanguage, t } = useLanguage();
 
