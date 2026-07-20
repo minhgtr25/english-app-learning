@@ -1,8 +1,8 @@
-# Biến môi trường chứa pass database, secret key
+# Environment variables and secrets
 .env
 .env.local
 
-# Thư viện nặng (KHÔNG push cái này lên git)
+# Dependencies
 node_modules/
 
 # Expo / React Native build files

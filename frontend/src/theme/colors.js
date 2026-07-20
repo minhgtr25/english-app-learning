@@ -1,16 +1,20 @@
-// frontend/src/theme/colors.js
 export const COLORS = {
-  primary: '#58CC02',      // Xanh lá Duolingo
-  primaryDark: '#46A302',
-  secondary: '#1CB0F6',    // Xanh dương
-  secondaryDark: '#1899D6',
-  accent: '#FFC800',       // Vàng xu/streak
-  accentDark: '#E5B200',
-  text: '#4B4B4B',
-  textLight: '#777777',
-  cardBg: '#F7F7F7',
-  border: '#E5E5E5',
+  primary: '#43A047',
+  primaryDark: '#2E7D32',
+  secondary: '#0F8B8D',
+  secondaryDark: '#0A6E70',
+  accent: '#F2B705',
+  accentDark: '#C99100',
+  ink: '#17211B',
+  text: '#24312A',
+  textLight: '#66746C',
+  muted: '#EEF5F0',
+  surface: '#FBFCFA',
+  cardBg: '#FFFFFF',
+  border: '#DDE7E0',
+  dark: '#1C2620',
   white: '#FFFFFF',
-  error: '#FF4B4B',
-  success: '#58CC02'
+  error: '#D64545',
+  success: '#43A047',
+  warning: '#F2B705'
 };

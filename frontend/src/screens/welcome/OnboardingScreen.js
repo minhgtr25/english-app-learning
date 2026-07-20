@@ -1,77 +1,59 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { COLORS } from '../../theme/colors';
+import { useLanguage } from '../../i18n/LanguageContext';
 
-const { width } = Dimensions.get('window');
-
-const SLIDES = [
-  {
-    id: '1',
-    emoji: '🎯',
-    title: 'Bài học ngắn gọn',
-    desc: 'Luyện tập 5-10 phút mỗi ngày với các bài học thiết kế dạng trò chơi cuốn hút.'
-  },
-  {
-    id: '2',
-    emoji: '🔥',
-    title: 'Duy trì Streak',
-    desc: 'Học liên tục mỗi ngày để duy trì chuỗi Streak và nhận nhiều phần thưởng hấp dẫn.'
-  },
-  {
-    id: '3',
-    emoji: '💬',
-    title: 'Giao lưu Realtime',
-    desc: 'Trò chuyện trực tiếp cùng các học viên khác để nâng cao khả năng phản xạ.'
-  }
-];
+const CONTENT = {
+  vi: [
+    ['Lộ trình như game', 'Mỗi bài là một nhiệm vụ nhỏ: nghe, từ vựng, ngữ pháp và đọc hiểu.'],
+    ['Thi thử có phản hồi', 'Chọn đáp án, xem đúng sai ngay, cộng điểm và hoàn thành bài học.'],
+    ['Học cùng lớp', 'Chat realtime, bảng xếp hạng và dashboard giúp nhóm theo dõi tiến độ.']
+  ],
+  en: [
+    ['Game-like roadmap', 'Each lesson is a compact mission across listening, vocabulary, grammar, and reading.'],
+    ['Exam feedback', 'Answer questions, see instant feedback, earn points, and complete lessons.'],
+    ['Learn with your class', 'Realtime chat, leaderboard, and admin analytics keep the class moving.']
+  ]
+};
 
 export default function OnboardingScreen({ navigation }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [index, setIndex] = useState(0);
+  const { language, t } = useLanguage();
+  const slide = CONTENT[language][index];
 
-  const handleNext = () => {
-    if (currentIndex < SLIDES.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
+  const next = () => {
+    if (index === CONTENT[language].length - 1) {
       navigation.navigate('Register');
+      return;
     }
+    setIndex(value => value + 1);
   };
-
-  const slide = SLIDES[currentIndex];
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Skip Button */}
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.skipText}>Bỏ qua</Text>
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.skip} onPress={() => navigation.navigate('Register')}>
+        <Text style={styles.skipText}>{t.skip}</Text>
+      </TouchableOpacity>
+
+      <View style={styles.panel}>
+        <Text style={styles.kicker}>0{index + 1} / 03</Text>
+        <Text style={styles.title}>{slide[0]}</Text>
+        <Text style={styles.copy}>{slide[1]}</Text>
+        <View style={styles.visualGrid}>
+          <View style={[styles.tile, styles.tileWide]} />
+          <View style={[styles.tile, styles.tileAccent]} />
+          <View style={[styles.tile, styles.tileDark]} />
+        </View>
       </View>
 
-      {/* Main Content Slide */}
-      <View style={styles.content}>
-        <Text style={styles.emoji}>{slide.emoji}</Text>
-        <Text style={styles.title}>{slide.title}</Text>
-        <Text style={styles.desc}>{slide.desc}</Text>
-      </View>
-
-      {/* Indicator & Next Button */}
-      <View style={styles.footer}>
-        <View style={styles.indicatorContainer}>
-          {SLIDES.map((_, index) => (
-            <View 
-              key={index} 
-              style={[
-                styles.indicator, 
-                currentIndex === index ? styles.activeIndicator : styles.inactiveIndicator
-              ]} 
-            />
+      <View>
+        <View style={styles.dots}>
+          {CONTENT[language].map((_, dotIndex) => (
+            <View key={dotIndex} style={[styles.dot, index === dotIndex && styles.dotActive]} />
           ))}
         </View>
-
-        <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
-          <Text style={styles.nextBtnText}>
-            {currentIndex === SLIDES.length - 1 ? 'TẠO TÀI KHOẢN' : 'TIẾP THEO'}
-          </Text>
+        <TouchableOpacity style={styles.nextBtn} onPress={next}>
+          <Text style={styles.nextText}>{index === 2 ? t.createAccount : t.next}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -79,18 +61,21 @@ export default function OnboardingScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.white, paddingHorizontal: 24, justifyContent: 'space-between' },
-  topBar: { alignItems: 'flex-end', paddingTop: 10 },
-  skipText: { color: COLORS.textLight, fontSize: 15, fontWeight: 'bold' },
-  content: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
-  emoji: { fontSize: 90, marginBottom: 20 },
-  title: { fontSize: 26, fontWeight: 'bold', color: COLORS.text, textAlign: 'center', marginBottom: 15 },
-  desc: { fontSize: 16, color: COLORS.textLight, textAlign: 'center', lineHeight: 24 },
-  footer: { marginBottom: 40 },
-  indicatorContainer: { flexDirection: 'row', justifyContent: 'center', marginBottom: 25 },
-  indicator: { height: 8, borderRadius: 4, marginHorizontal: 4 },
-  activeIndicator: { width: 24, backgroundColor: COLORS.primary },
-  inactiveIndicator: { width: 8, backgroundColor: COLORS.border },
-  nextBtn: { backgroundColor: COLORS.primary, paddingVertical: 16, borderRadius: 16, alignItems: 'center' },
-  nextBtnText: { color: COLORS.white, fontSize: 16, fontWeight: 'bold' }
+  container: { flex: 1, backgroundColor: COLORS.surface, padding: 22 },
+  skip: { alignSelf: 'flex-end', paddingVertical: 10 },
+  skipText: { color: COLORS.textLight, fontWeight: '800' },
+  panel: { flex: 1, justifyContent: 'center' },
+  kicker: { color: COLORS.secondaryDark, fontWeight: '900', marginBottom: 14 },
+  title: { fontSize: 34, fontWeight: '900', color: COLORS.ink, lineHeight: 40 },
+  copy: { color: COLORS.textLight, fontSize: 16, lineHeight: 24, marginTop: 14 },
+  visualGrid: { marginTop: 34, height: 190, gap: 12 },
+  tile: { flex: 1, borderRadius: 24, backgroundColor: COLORS.white, borderWidth: 1, borderColor: COLORS.border },
+  tileWide: { flex: 1.2, backgroundColor: COLORS.muted },
+  tileAccent: { backgroundColor: COLORS.accent },
+  tileDark: { backgroundColor: COLORS.dark },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 18 },
+  dot: { width: 8, height: 8, borderRadius: 10, backgroundColor: COLORS.border },
+  dotActive: { width: 26, backgroundColor: COLORS.primary },
+  nextBtn: { backgroundColor: COLORS.dark, borderRadius: 18, paddingVertical: 17, alignItems: 'center' },
+  nextText: { color: COLORS.white, fontWeight: '900', fontSize: 16 }
 });
