@@ -86,7 +86,7 @@ export default function VipSubscribeScreen({ navigation }) {
       await new Promise((r) => setTimeout(r, 1200));
       Alert.alert('🎉 Đăng ký thành công!', `Bạn đã đăng ký gói VIP ${plan.label} với giá ${plan.price}.`);
     } catch (err) {
-      Alert.alert('Lỗi', 'Không thể kết nối đến máy chủ. Vui lòng thử lại.');
+      Alert.alert('Lỗi', 'Không thể kết nối đến máy chủ. Vui lòng hãy thử lại.');
     } finally {
       setLoading(false);
     }

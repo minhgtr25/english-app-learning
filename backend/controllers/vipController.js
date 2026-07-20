@@ -133,7 +133,7 @@ const cancelVip = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Đã hủy tự động gia hạn VIP. Tài khoản VIP vẫn có hiệu lực đến hết hạn.",
+      message: "Đã hủy tự động gia hạn gói VIP. Tài khoản VIP vẫn có hiệu lực đến hết hạn.",
     });
   } catch (error) {
     console.error("cancelVip error:", error);
