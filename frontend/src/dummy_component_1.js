@@ -8,7 +8,7 @@ const DUMMY_PRODUCTS = [
   {
     id: '1',
     name: 'Air Max Horizon',
-    category: 'Giày dép',
+    category: '',
     price: '2,499,000đ',
     rating: 4.8,
     reviews: 124,
@@ -87,8 +87,8 @@ export function ProductCatalogScreen() {
           <Text style={styles.reviewText}>({item.reviews})</Text>
         </View>
         <Text style={styles.productPrice}>{item.price}</Text>
-        <TouchableOpacity 
-          style={styles.addButton} 
+        <TouchableOpacity
+          style={styles.addButton}
           onPress={() => setCartCount(prev => prev + 1)}
           activeOpacity={0.8}
         >

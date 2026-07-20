@@ -67,19 +67,19 @@ export function CartScreen() {
         <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
         <Text style={styles.itemMeta}>Phân loại: {item.size}</Text>
         <Text style={styles.itemPrice}>{formatPrice(item.price)}</Text>
-        
+
         {/* Quantity Controls */}
         <View style={styles.quantityRow}>
           <View style={styles.counter}>
-            <TouchableOpacity 
-              style={styles.counterBtn} 
+            <TouchableOpacity
+              style={styles.counterBtn}
               onPress={() => updateQuantity(item.id, -1)}
             >
               <Text style={styles.counterBtnText}>-</Text>
             </TouchableOpacity>
             <Text style={styles.counterValue}>{item.quantity}</Text>
-            <TouchableOpacity 
-              style={styles.counterBtn} 
+            <TouchableOpacity
+              style={styles.counterBtn}
               onPress={() => updateQuantity(item.id, 1)}
             >
               <Text style={styles.counterBtnText}>+</Text>
@@ -156,7 +156,7 @@ export function CartScreen() {
           </View>
 
           {/* Checkout Button */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.checkoutBtn}
             onPress={() => Alert.alert('Thanh toán', 'Chuyển đến trang thanh toán...')}
           >

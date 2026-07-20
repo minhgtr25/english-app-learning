@@ -38,10 +38,10 @@ export function ProductDetailScreen() {
         {/* Main Product Image */}
         <View style={styles.imageContainer}>
           <Image source={{ uri: selectedImage }} style={styles.mainImage} />
-          
+
           {/* Favorite Toggle Button */}
-          <TouchableOpacity 
-            style={styles.favoriteButton} 
+          <TouchableOpacity
+            style={styles.favoriteButton}
             onPress={() => setIsFavorite(prev => !prev)}
             activeOpacity={0.8}
           >
@@ -52,8 +52,8 @@ export function ProductDetailScreen() {
         {/* Thumbnail Carousel */}
         <View style={styles.thumbnailRow}>
           {PRODUCT.images.map((img, idx) => (
-            <TouchableOpacity 
-              key={idx} 
+            <TouchableOpacity
+              key={idx}
               style={[
                 styles.thumbnailWrapper,
                 selectedImage === img && styles.thumbnailActive
@@ -69,7 +69,7 @@ export function ProductDetailScreen() {
         <View style={styles.detailsContainer}>
           <Text style={styles.categoryText}>{PRODUCT.category}</Text>
           <Text style={styles.nameText}>{PRODUCT.name}</Text>
-          
+
           {/* Rating Section */}
           <View style={styles.ratingRow}>
             <View style={styles.starsContainer}>
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#ffffff',
     fontWeight: '700',
-    fontSize: 15,
+    fontSize: 115,
   }
 });
 
