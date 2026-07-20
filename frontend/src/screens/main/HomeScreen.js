@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { COLORS } from '../../theme/colors';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { AppHeader, MetricCard, Screen } from '../../components/ui';
+import { AppHeader, MetricCard, PrimaryButton, Screen } from '../../components/ui';
+import { useAuth } from '../../state/AuthContext';
 
 const missions = [
   ['Vocabulary', '12 min', '82%', 'Quiz'],
@@ -12,6 +13,12 @@ const missions = [
 
 export default function HomeScreen({ navigation }) {
   const { language, setLanguage, t } = useLanguage();
+  const { logout, user } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigation.replace('Landing');
+  };
 
   return (
     <Screen>
@@ -25,11 +32,12 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
           }
         />
+        <Text style={styles.greeting}>{user?.fullName || 'Demo Student'}</Text>
         <Text style={styles.subtitle}>{t.homeSubtitle}</Text>
 
         <View style={styles.statsRow}>
-          <MetricCard label={t.streak} value="14" />
-          <MetricCard label={t.score} value="1280" />
+          <MetricCard label={t.streak} value={String(user?.streak || 14)} />
+          <MetricCard label={t.score} value={String(user?.totalScore || 1280)} />
           <MetricCard label={t.accuracy} value="82%" />
         </View>
 
@@ -48,7 +56,7 @@ export default function HomeScreen({ navigation }) {
                 <Text style={styles.missionTitle}>{item[0]}</Text>
                 <Text style={styles.missionMeta}>{item[1]} | {item[2]}</Text>
               </View>
-              <Text style={styles.missionArrow}>›</Text>
+              <Text style={styles.missionArrow}>{'>'}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -59,6 +67,8 @@ export default function HomeScreen({ navigation }) {
           <NavButton title={t.leaderboard} onPress={() => navigation.navigate('Leaderboard')} />
           <NavButton title={t.admin} onPress={() => navigation.navigate('AdminDashboard')} />
         </View>
+
+        <PrimaryButton title="Logout" onPress={handleLogout} variant="dark" style={styles.logoutButton} />
       </ScrollView>
     </Screen>
   );
@@ -73,6 +83,7 @@ function NavButton({ title, onPress }) {
 }
 
 const styles = StyleSheet.create({
+  greeting: { color: COLORS.ink, fontWeight: '900', marginTop: 14, fontSize: 16 },
   subtitle: { color: COLORS.textLight, lineHeight: 22, marginTop: 10, marginBottom: 22 },
   langPill: { backgroundColor: COLORS.white, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: COLORS.border },
   langText: { color: COLORS.primaryDark, fontWeight: '900' },
@@ -85,8 +96,9 @@ const styles = StyleSheet.create({
   missionCopy: { flex: 1, marginLeft: 14 },
   missionTitle: { color: COLORS.text, fontWeight: '900', fontSize: 16 },
   missionMeta: { color: COLORS.textLight, marginTop: 3 },
-  missionArrow: { color: COLORS.textLight, fontSize: 30, fontWeight: '700' },
+  missionArrow: { color: COLORS.textLight, fontSize: 22, fontWeight: '900' },
   navGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 22, marginBottom: 20 },
   navButton: { width: '48%', backgroundColor: COLORS.white, borderRadius: 18, borderWidth: 1, borderColor: COLORS.border, padding: 16 },
-  navButtonText: { color: COLORS.text, fontWeight: '900' }
+  navButtonText: { color: COLORS.text, fontWeight: '900' },
+  logoutButton: { marginBottom: 24 }
 });

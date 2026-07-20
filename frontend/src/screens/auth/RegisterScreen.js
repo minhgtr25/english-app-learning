@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Text, StyleSheet, TextInput, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../../theme/colors';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { AppHeader, Field, PrimaryButton, Screen } from '../../components/ui';
-import api from '../../api/client';
+import { useAuth } from '../../state/AuthContext';
 
 export default function RegisterScreen({ navigation }) {
   const { t } = useLanguage();
+  const { register } = useAuth();
   const [fullName, setFullName] = useState('Minh Tran');
   const [email, setEmail] = useState('student@demo.com');
   const [password, setPassword] = useState('123456');
@@ -17,17 +17,12 @@ export default function RegisterScreen({ navigation }) {
   const submit = async () => {
     setNotice('');
     setLoading(true);
-    try {
-      const { data } = await api.post('/auth/register', { fullName, email, password });
-      if (data?.token) {
-        await AsyncStorage.setItem('token', data.token);
-      }
-    } catch (err) {
+    const result = await register({ fullName, email, password });
+    if (result.demo) {
       setNotice(t.demoMode);
-    } finally {
-      setLoading(false);
-      navigation.replace('Home');
     }
+    setLoading(false);
+    navigation.replace('Home');
   };
 
   return (
