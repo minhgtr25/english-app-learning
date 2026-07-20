@@ -53,6 +53,12 @@ export function AuthProvider({ children }) {
     await AsyncStorage.setItem('user', JSON.stringify(normalizedUser));
   };
 
+  const updateUser = async patch => {
+    const nextUser = { ...(user || DEMO_USER), ...patch };
+    setUser(nextUser);
+    await AsyncStorage.setItem('user', JSON.stringify(nextUser));
+  };
+
   const login = async credentials => {
     try {
       const { data } = await api.post('/auth/login', credentials);
@@ -92,6 +98,7 @@ export function AuthProvider({ children }) {
     logout,
     register,
     token,
+    updateUser,
     user
   }), [booting, token, user]);
 

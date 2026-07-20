@@ -5,9 +5,11 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { AppHeader, EmptyState, PrimaryButton, Screen } from '../../components/ui';
 import api from '../../api/client';
 import { demoQuestions } from '../../data/demoData';
+import { useAuth } from '../../state/AuthContext';
 
 export default function QuizScreen({ navigation }) {
   const { t } = useLanguage();
+  const { updateUser, user } = useAuth();
   const [questions, setQuestions] = useState(demoQuestions);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState('');
@@ -38,8 +40,14 @@ export default function QuizScreen({ navigation }) {
     if (selected === question.correctAnswer) {
       setScore(value => value + 10);
       try {
-        await api.post('/progress/score', { questionId: question._id, score: 10 });
+        const { data } = await api.post('/progress/score', { questionId: question._id, score: 10 });
+        if (data?.user) {
+          await updateUser(data.user);
+        } else {
+          await updateUser({ totalScore: (user?.totalScore || 0) + 10 });
+        }
       } catch (err) {
+        await updateUser({ totalScore: (user?.totalScore || 0) + 10 });
         setNotice(t.emptyState);
       }
     }
