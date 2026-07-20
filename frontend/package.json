@@ -30,6 +30,7 @@
     "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
+    "eas-cli": "^12.5.0",
     "expo-doctor": "^1.20.1"
   }
 }
