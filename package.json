@@ -7,6 +7,7 @@
     "check": "node scripts/run-all.js check",
     "dev": "node scripts/run-all.js dev",
     "seed": "node scripts/run-all.js seed",
-    "build:web": "node scripts/run-all.js build:web"
+    "build:web": "node scripts/run-all.js build:web",
+    "build:apk": "cd frontend && npx eas build -p android --profile preview"
   }
 }
