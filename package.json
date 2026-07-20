@@ -1,0 +1,12 @@
+{
+  "name": "english-learning-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "node scripts/run-all.js setup",
+    "check": "node scripts/run-all.js check",
+    "dev": "node scripts/run-all.js dev",
+    "seed": "node scripts/run-all.js seed",
+    "build:web": "node scripts/run-all.js build:web"
+  }
+}
