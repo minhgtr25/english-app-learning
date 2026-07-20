@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, StyleSheet, TextInput, View } from 'react-native';
+import { Text, StyleSheet, TextInput, View, TouchableOpacity } from 'react-native';
 import { COLORS } from '../../theme/colors';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { AppHeader, Field, PrimaryButton, Screen } from '../../components/ui';
