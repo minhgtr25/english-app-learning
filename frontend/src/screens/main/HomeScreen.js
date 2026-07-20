@@ -51,9 +51,15 @@ export default function HomeScreen({ navigation }) {
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
-          <MetricCard label={t.streak} value={String(user?.streak || 14)} />
-          <MetricCard label={t.score} value={String(user?.totalScore || 1280)} />
-          <MetricCard label={t.accuracy} value="82%" />
+          <MetricCard label="TỔNG ĐIỂM" value={String(user?.totalScore || 1280)} />
+          <MetricCard
+            label="ĐIỂM TRUNG BÌNH"
+            value={String(user?.totalQuizzes > 0 ? Math.round((user.totalScore || 0) / user.totalQuizzes) : 85)}
+          />
+          <MetricCard
+            label="ĐỘ CHÍNH XÁC"
+            value={user?.totalQuestions > 0 ? `${Math.round(((user.correctQuestions || 0) / user.totalQuestions) * 100)}%` : '83%'}
+          />
         </View>
 
         {/* Learning Roadmap */}

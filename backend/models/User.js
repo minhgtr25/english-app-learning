@@ -6,9 +6,10 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['student', 'admin'], default: 'student' },
-    streak: { type: Number, default: 1 },
     totalScore: { type: Number, default: 0 },
-    lastActiveDate: { type: Date }
+    totalQuizzes: { type: Number, default: 0 },
+    totalQuestions: { type: Number, default: 0 },
+    correctQuestions: { type: Number, default: 0 }
   },
   { timestamps: true }
 );

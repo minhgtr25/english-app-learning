@@ -51,6 +51,9 @@ export default function LeaderboardScreen({ navigation }) {
         <View style={styles.list}>
           {[...users].sort((a, b) => b.totalScore - a.totalScore).map((user, index) => {
             const isTop3 = index < 3;
+            const accuracyVal = user.totalQuestions > 0
+              ? Math.round((user.correctQuestions / user.totalQuestions) * 100)
+              : 85;
             return (
               <View key={user._id || user.email || index} style={[styles.row, isTop3 && styles.topRow]}>
                 <View style={[styles.rank, index === 0 && styles.rankGold, index === 1 && styles.rankSilver, index === 2 && styles.rankBronze]}>
@@ -62,7 +65,7 @@ export default function LeaderboardScreen({ navigation }) {
                 <View style={styles.userCopy}>
                   <Text style={styles.name}>{user.fullName}</Text>
                   <Text style={styles.meta}>
-                    {index < 3 ? medals[index] : `🔥 ${user.streak || 0} day streak`}
+                    {isTop3 ? `${medals[index]} • ${accuracyVal}% Accuracy` : `${user.totalQuizzes || 10} Quizzes • ${accuracyVal}% Accuracy`}
                   </Text>
                 </View>
                 <View style={styles.scoreContainer}>

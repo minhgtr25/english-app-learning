@@ -8,8 +8,10 @@ const DEMO_USER = {
   fullName: 'Demo Student',
   email: 'student@demo.com',
   role: 'student',
-  streak: 14,
-  totalScore: 1280
+  totalScore: 1280,
+  totalQuizzes: 15,
+  totalQuestions: 150,
+  correctQuestions: 125
 };
 
 export function AuthProvider({ children }) {

@@ -60,18 +60,39 @@ export default function QuizScreen({ route, navigation }) {
   const checkAnswer = async () => {
     if (!selected) return;
     setChecked(true);
-    if (selected === question.correctAnswer) {
+    const correct = selected === question.correctAnswer;
+    if (correct) {
       setScore(value => value + 10);
-      try {
-        const { data } = await api.post('/progress/score', { questionId: question._id, score: 10 });
-        if (data?.user) {
-          await updateUser(data.user);
-        } else {
-          await updateUser({ totalScore: (user?.totalScore || 0) + 10 });
-        }
-      } catch (err) {
-        await updateUser({ totalScore: (user?.totalScore || 0) + 10 });
+    }
+    
+    const scoreVal = correct ? 10 : 0;
+    try {
+      const { data } = await api.post('/progress/score', {
+        questionId: question._id,
+        score: scoreVal,
+        isCorrect: correct
+      });
+      if (data?.user) {
+        await updateUser(data.user);
+      } else {
+        const nextQuestions = (user?.totalQuestions || 0) + 1;
+        const nextCorrect = (user?.correctQuestions || 0) + (correct ? 1 : 0);
+        const nextScore = (user?.totalScore || 0) + scoreVal;
+        await updateUser({
+          totalScore: nextScore,
+          totalQuestions: nextQuestions,
+          correctQuestions: nextCorrect
+        });
       }
+    } catch (err) {
+      const nextQuestions = (user?.totalQuestions || 0) + 1;
+      const nextCorrect = (user?.correctQuestions || 0) + (correct ? 1 : 0);
+      const nextScore = (user?.totalScore || 0) + scoreVal;
+      await updateUser({
+        totalScore: nextScore,
+        totalQuestions: nextQuestions,
+        correctQuestions: nextCorrect
+      });
     }
   };
 
@@ -84,9 +105,14 @@ export default function QuizScreen({ route, navigation }) {
     }
     setCompleted(true);
     try {
-      await api.post('/progress/complete', { lessonId: filterCategory || 'daily-exam', score });
+      const { data } = await api.post('/progress/complete', { lessonId: filterCategory || 'daily-exam', score });
+      if (data?.user) {
+        await updateUser(data.user);
+      } else {
+        await updateUser({ totalQuizzes: (user?.totalQuizzes || 0) + 1 });
+      }
     } catch (err) {
-      // Offline fallback
+      await updateUser({ totalQuizzes: (user?.totalQuizzes || 0) + 1 });
     }
   };
 

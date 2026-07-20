@@ -10,32 +10,17 @@ function signToken(user) {
   );
 }
 
-function sameDay(a, b) {
-  return a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate();
-}
-
-function isYesterday(date, now) {
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  return sameDay(date, yesterday);
-}
-
-async function syncStreak(user) {
-  const now = new Date();
-  if (!user.lastActiveDate) {
-    user.streak = Math.max(user.streak, 1);
-  } else if (sameDay(user.lastActiveDate, now)) {
-    return user;
-  } else if (isYesterday(user.lastActiveDate, now)) {
-    user.streak += 1;
-  } else {
-    user.streak = 1;
-  }
-  user.lastActiveDate = now;
-  await user.save();
-  return user;
+function formatUser(user) {
+  return {
+    _id: user._id,
+    fullName: user.fullName,
+    email: user.email,
+    role: user.role,
+    totalScore: user.totalScore || 0,
+    totalQuizzes: user.totalQuizzes || 0,
+    totalQuestions: user.totalQuestions || 0,
+    correctQuestions: user.correctQuestions || 0
+  };
 }
 
 async function register(req, res) {
@@ -55,20 +40,12 @@ async function register(req, res) {
       fullName,
       email,
       password: hashed,
-      role: role === 'admin' ? 'admin' : 'student',
-      lastActiveDate: new Date()
+      role: role === 'admin' ? 'admin' : 'student'
     });
 
     res.status(201).json({
       token: signToken(user),
-      user: {
-        _id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        streak: user.streak,
-        totalScore: user.totalScore
-      }
+      user: formatUser(user)
     });
   } catch (error) {
     res.status(500).json({ message: 'Register failed', error: error.message });
@@ -84,18 +61,9 @@ async function login(req, res) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    await syncStreak(user);
-
     res.json({
       token: signToken(user),
-      user: {
-        _id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        streak: user.streak,
-        totalScore: user.totalScore
-      }
+      user: formatUser(user)
     });
   } catch (error) {
     res.status(500).json({ message: 'Login failed', error: error.message });
@@ -103,7 +71,7 @@ async function login(req, res) {
 }
 
 async function me(req, res) {
-  res.json({ user: req.user });
+  res.json({ user: formatUser(req.user) });
 }
 
 module.exports = { register, login, me };
