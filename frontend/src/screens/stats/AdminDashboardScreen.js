@@ -22,6 +22,7 @@ export default function AdminDashboardScreen({ navigation }) {
     weeklyScores: [18, 36, 42, 64, 81]
   });
   const [notice, setNotice] = useState('');
+  const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     title: 'Speaking Warmup',
@@ -57,19 +58,56 @@ export default function AdminDashboardScreen({ navigation }) {
 
   const update = (key, value) => setForm(current => ({ ...current, [key]: value }));
 
-  const addQuestion = async () => {
+  const resetForm = () => {
+    setEditingId(null);
+    setForm({
+      title: 'Speaking Warmup',
+      category: 'Speaking',
+      englishText: 'Choose the best response: How are you doing?',
+      correctAnswer: 'I am doing well.',
+      options: 'I am doing well., It is a book., At 7 PM., Blue',
+      level: 'A2'
+    });
+  };
+
+  const startEdit = question => {
+    setEditingId(question._id);
+    setForm({
+      title: question.title,
+      category: question.category,
+      englishText: question.englishText,
+      correctAnswer: question.correctAnswer,
+      options: question.options.join(', '),
+      level: question.level
+    });
+  };
+
+  const saveQuestion = async () => {
     setSaving(true);
     const payload = {
       ...form,
-      _id: String(Date.now()),
       options: form.options.split(',').map(item => item.trim()).filter(Boolean)
     };
+
     try {
-      const { data } = await api.post('/questions', payload);
-      setQuestions(current => [data?.question || payload, ...current]);
+      if (editingId) {
+        const { data } = await api.put(`/questions/${editingId}`, payload);
+        const updatedQuestion = data?.question || { ...payload, _id: editingId };
+        setQuestions(current => current.map(item => item._id === editingId ? updatedQuestion : item));
+      } else {
+        const draft = { ...payload, _id: String(Date.now()) };
+        const { data } = await api.post('/questions', draft);
+        setQuestions(current => [data?.question || draft, ...current]);
+      }
+      resetForm();
     } catch (err) {
-      setQuestions(current => [payload, ...current]);
+      if (editingId) {
+        setQuestions(current => current.map(item => item._id === editingId ? { ...payload, _id: editingId } : item));
+      } else {
+        setQuestions(current => [{ ...payload, _id: String(Date.now()) }, ...current]);
+      }
       setNotice(t.emptyState);
+      resetForm();
     } finally {
       setSaving(false);
     }
@@ -118,7 +156,14 @@ export default function AdminDashboardScreen({ navigation }) {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.sectionTitle}>{t.addQuestion}</Text>
+          <View style={styles.formHeader}>
+            <Text style={styles.sectionTitle}>{editingId ? 'Edit question' : t.addQuestion}</Text>
+            {editingId ? (
+              <TouchableOpacity style={styles.cancelBtn} onPress={resetForm}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
           {[
             ['title', t.title],
             ['category', t.category],
@@ -131,7 +176,7 @@ export default function AdminDashboardScreen({ navigation }) {
               <TextInput style={styles.input} value={form[key]} onChangeText={value => update(key, value)} />
             </Field>
           ))}
-          <PrimaryButton title={t.save} onPress={addQuestion} loading={saving} variant="dark" style={styles.button} />
+          <PrimaryButton title={editingId ? 'Update' : t.save} onPress={saveQuestion} loading={saving} variant="dark" style={styles.button} />
         </View>
 
         <Text style={styles.sectionTitle}>{t.questionBank}</Text>
@@ -142,9 +187,14 @@ export default function AdminDashboardScreen({ navigation }) {
                 <Text style={styles.questionTitle}>{item.title}</Text>
                 <Text style={styles.questionMeta}>{item.category} | {item.level}</Text>
               </View>
-              <TouchableOpacity style={styles.deleteBtn} onPress={() => removeQuestion(item._id)}>
-                <Text style={styles.deleteText}>{t.delete}</Text>
-              </TouchableOpacity>
+              <View style={styles.rowActions}>
+                <TouchableOpacity style={styles.editBtn} onPress={() => startEdit(item)}>
+                  <Text style={styles.editText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.deleteBtn} onPress={() => removeQuestion(item._id)}>
+                  <Text style={styles.deleteText}>{t.delete}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))}
         </View>
@@ -159,6 +209,9 @@ const styles = StyleSheet.create({
   sectionTitle: { color: COLORS.ink, fontWeight: '900', fontSize: 18, marginBottom: 14, marginTop: 18 },
   chart: { borderRadius: 18 },
   form: { backgroundColor: COLORS.white, borderRadius: 24, borderWidth: 1, borderColor: COLORS.border, padding: 17, marginTop: 18 },
+  formHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cancelBtn: { backgroundColor: COLORS.muted, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
+  cancelText: { color: COLORS.text, fontWeight: '900' },
   input: { backgroundColor: COLORS.muted, borderWidth: 1, borderColor: COLORS.border, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 11, color: COLORS.text },
   button: { marginTop: 16 },
   bank: { gap: 10, marginBottom: 24 },
@@ -166,6 +219,9 @@ const styles = StyleSheet.create({
   questionCopy: { flex: 1 },
   questionTitle: { color: COLORS.text, fontWeight: '900' },
   questionMeta: { color: COLORS.textLight, marginTop: 3 },
+  rowActions: { flexDirection: 'row', gap: 8 },
+  editBtn: { backgroundColor: '#E8F6EA', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
+  editText: { color: COLORS.primaryDark, fontWeight: '900' },
   deleteBtn: { backgroundColor: '#FCECEC', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
   deleteText: { color: COLORS.error, fontWeight: '900' }
 });
