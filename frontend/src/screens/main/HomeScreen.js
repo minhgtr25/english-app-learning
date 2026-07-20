@@ -5,11 +5,18 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { MetricCard, Screen } from '../../components/ui';
 import { useAuth } from '../../state/AuthContext';
 
-const missions = [
-  ['Vocabulary', '12 min', '82%', 'Quiz'],
-  ['Grammar exam', '18 min', '68%', 'Quiz'],
-  ['Speaking room', 'Live', '4 peers', 'ChatRoom']
-];
+const MISSIONS = {
+  vi: [
+    ['Luyện Từ vựng (Vocabulary)', '10 câu hỏi', 'Trình độ A2', 'Quiz'],
+    ['Bài thi Ngữ pháp (Grammar)', '8 câu hỏi', 'Trình độ B1', 'Quiz'],
+    ['Phòng luyện nói (Speaking)', 'Phòng nhóm', 'Trực tuyến', 'ChatRoom']
+  ],
+  en: [
+    ['Vocabulary Sprint', '10 questions', 'Level A2', 'Quiz'],
+    ['Grammar Exam', '8 questions', 'Level B1', 'Quiz'],
+    ['Speaking Room', 'Group chat', 'Live online', 'ChatRoom']
+  ]
+};
 
 export default function HomeScreen({ navigation }) {
   const { language, setLanguage, t } = useLanguage();
@@ -69,9 +76,13 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.roadmap}>
-          {missions.map((item, index) => {
+          {(MISSIONS[language] || MISSIONS.vi).map((item, index) => {
             const isQuiz = item[3] === 'Quiz';
-            const category = item[0] === 'Grammar exam' ? 'Grammar' : item[0];
+            const category = item[0].includes('Grammar')
+              ? 'Grammar'
+              : item[0].includes('Speaking')
+              ? 'Speaking'
+              : 'Vocabulary';
             return (
               <TouchableOpacity
                 key={item[0]}
