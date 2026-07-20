@@ -1,0 +1,17 @@
+# Biến môi trường chứa pass database, secret key
+.env
+.env.local
+
+# Thư viện nặng (KHÔNG push cái này lên git)
+node_modules/
+
+# Expo / React Native build files
+.expo/
+dist/
+web-build/
+*.apk
+*.aab
+
+# OS files
+.DS_Store
+Thumbs.db
