@@ -1,11 +1,9 @@
 const mongoose = require('mongoose');
 
-async function connectDB() {
-  const uri = process.env.MONGODB_URI;
+const FALLBACK_URI = 'mongodb+srv://minhdq25:minhdq25123@cluster0.mongodb.net/english_learning_app?retryWrites=true&w=majority';
 
-  if (!uri) {
-    throw new Error('MONGODB_URI is missing in .env');
-  }
+async function connectDB() {
+  const uri = process.env.MONGODB_URI || FALLBACK_URI;
 
   await mongoose.connect(uri);
   console.log('MongoDB connected');
