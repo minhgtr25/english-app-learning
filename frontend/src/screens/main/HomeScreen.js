@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { COLORS } from '../../theme/colors';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { AppHeader, MetricCard, PrimaryButton, Screen } from '../../components/ui';
 import { useAuth } from '../../state/AuthContext';
+import api from '../../api/client';
 
 const missions = [
   ['Vocabulary', '12 min', '82%', 'Quiz'],
@@ -14,6 +15,22 @@ const missions = [
 export default function HomeScreen({ navigation }) {
   const { language, setLanguage, t } = useLanguage();
   const { logout, user } = useAuth();
+  const [backendOnline, setBackendOnline] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    api.get('/health')
+      .then(() => {
+        if (mounted) setBackendOnline(true);
+      })
+      .catch(() => {
+        if (mounted) setBackendOnline(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -33,6 +50,10 @@ export default function HomeScreen({ navigation }) {
           }
         />
         <Text style={styles.greeting}>{user?.fullName || 'Demo Student'}</Text>
+        <View style={[styles.statusPill, backendOnline ? styles.statusOnline : styles.statusDemo]}>
+          <View style={[styles.statusDot, backendOnline ? styles.statusDotOnline : styles.statusDotDemo]} />
+          <Text style={styles.statusText}>{backendOnline ? 'Backend online' : 'Demo mode'}</Text>
+        </View>
         <Text style={styles.subtitle}>{t.homeSubtitle}</Text>
 
         <View style={styles.statsRow}>
@@ -84,6 +105,13 @@ function NavButton({ title, onPress }) {
 
 const styles = StyleSheet.create({
   greeting: { color: COLORS.ink, fontWeight: '900', marginTop: 14, fontSize: 16 },
+  statusPill: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, marginTop: 10 },
+  statusOnline: { backgroundColor: '#E8F6EA' },
+  statusDemo: { backgroundColor: '#FFF6D8' },
+  statusDot: { width: 8, height: 8, borderRadius: 8 },
+  statusDotOnline: { backgroundColor: COLORS.primary },
+  statusDotDemo: { backgroundColor: COLORS.warning },
+  statusText: { color: COLORS.ink, fontWeight: '900', fontSize: 12 },
   subtitle: { color: COLORS.textLight, lineHeight: 22, marginTop: 10, marginBottom: 22 },
   langPill: { backgroundColor: COLORS.white, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: COLORS.border },
   langText: { color: COLORS.primaryDark, fontWeight: '900' },
