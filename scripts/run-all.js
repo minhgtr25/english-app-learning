@@ -56,7 +56,7 @@ async function runDev() {
     windowsHide: true
   });
 
-  const frontend = spawn(npm, ['start'], {
+  const frontend = spawn(npm, ['run', 'web'], {
     cwd: path.resolve(process.cwd(), 'frontend'),
     shell: isWindows,
     stdio: 'inherit',
