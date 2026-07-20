@@ -10,6 +10,7 @@ import QuizScreen from '../screens/main/QuizScreen';
 import ChatRoomScreen from '../screens/main/ChatRoomScreen';
 import LeaderboardScreen from '../screens/stats/LeaderboardScreen';
 import AdminDashboardScreen from '../screens/stats/AdminDashboardScreen';
+import SettingsScreen from '../screens/main/SettingsScreen';
 import { useAuth } from '../state/AuthContext';
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +33,7 @@ export default function AppNavigator() {
       <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
       <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
       <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 }

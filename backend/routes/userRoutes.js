@@ -1,9 +1,10 @@
 const express = require('express');
-const { leaderboard } = require('../controllers/userController');
+const { leaderboard, updateProfile } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 router.get('/leaderboard', protect, leaderboard);
+router.put('/profile', protect, updateProfile);
 
 module.exports = router;
