@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "English Learning App",
-    "slug": "english-learning-app",
+    "slug": "english-app",
     "owner": "minhdq25s-team",
     "version": "1.0.0",
     "platforms": ["ios", "android", "web"],
