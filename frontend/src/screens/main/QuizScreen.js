@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { COLORS } from '../../theme/colors';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { AppHeader, EmptyState, PrimaryButton, Screen } from '../../components/ui';
@@ -7,30 +7,53 @@ import api from '../../api/client';
 import { demoQuestions } from '../../data/demoData';
 import { useAuth } from '../../state/AuthContext';
 
-export default function QuizScreen({ navigation }) {
+export default function QuizScreen({ route, navigation }) {
+  const { category: filterCategory } = route.params || {};
   const { t } = useLanguage();
   const { updateUser, user } = useAuth();
-  const [questions, setQuestions] = useState(demoQuestions);
+  
+  // Set initial questions list based on filter
+  const initialQuestions = useMemo(() => {
+    if (!filterCategory) return demoQuestions;
+    const filtered = demoQuestions.filter(q => q.category?.toLowerCase() === filterCategory.toLowerCase());
+    return filtered.length ? filtered : demoQuestions;
+  }, [filterCategory]);
+
+  const [questions, setQuestions] = useState(initialQuestions);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState('');
   const [checked, setChecked] = useState(false);
   const [score, setScore] = useState(0);
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(true);
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     let mounted = true;
     api.get('/questions')
       .then(({ data }) => {
         const list = Array.isArray(data) ? data : data?.questions;
-        if (mounted && list?.length) setQuestions(list);
+        if (mounted && list?.length) {
+          const filtered = filterCategory
+            ? list.filter(q => q.category?.toLowerCase() === filterCategory.toLowerCase())
+            : list;
+          setQuestions(filtered.length ? filtered : list);
+        }
       })
-      .catch(() => setNotice(t.emptyState))
+      .catch(() => {
+        if (mounted) {
+          const filtered = filterCategory
+            ? demoQuestions.filter(q => q.category?.toLowerCase() === filterCategory.toLowerCase())
+            : demoQuestions;
+          setQuestions(filtered.length ? filtered : demoQuestions);
+          setNotice(t.emptyState);
+        }
+      })
       .finally(() => mounted && setLoading(false));
     return () => { mounted = false; };
-  }, [t.emptyState]);
+  }, [t.emptyState, filterCategory]);
 
-  const question = questions[index];
+  const question = questions[index] || demoQuestions[0];
   const isCorrect = selected === question.correctAnswer;
   const progress = useMemo(() => `${index + 1}/${questions.length}`, [index, questions.length]);
 
@@ -48,7 +71,6 @@ export default function QuizScreen({ navigation }) {
         }
       } catch (err) {
         await updateUser({ totalScore: (user?.totalScore || 0) + 10 });
-        setNotice(t.emptyState);
       }
     }
   };
@@ -60,19 +82,53 @@ export default function QuizScreen({ navigation }) {
       setChecked(false);
       return;
     }
+    setCompleted(true);
     try {
-      await api.post('/progress/complete', { lessonId: 'daily-exam', score });
+      await api.post('/progress/complete', { lessonId: filterCategory || 'daily-exam', score });
     } catch (err) {
-      setNotice(t.emptyState);
-    } finally {
-      navigation.navigate('Home');
+      // Offline fallback
     }
   };
 
+  if (completed) {
+    const accuracyVal = questions.length > 0 ? Math.round((score / (questions.length * 10)) * 100) : 100;
+    return (
+      <Screen style={styles.completedScreen}>
+        <View style={styles.completedCard}>
+          <Text style={styles.completedEmoji}>🎉</Text>
+          <Text style={styles.completedTitle}>MISSION COMPLETE!</Text>
+          <Text style={styles.completedSub}>You have successfully finished the {filterCategory || 'Practice'} drill.</Text>
+
+          <View style={styles.resultsGrid}>
+            <View style={styles.resultBox}>
+              <Text style={styles.resultLabel}>SCORE GAINED</Text>
+              <Text style={styles.resultValue}>+{score} PTS</Text>
+            </View>
+            <View style={styles.resultBox}>
+              <Text style={styles.resultLabel}>ACCURACY</Text>
+              <Text style={styles.resultValue}>{accuracyVal}%</Text>
+            </View>
+          </View>
+
+          <PrimaryButton
+            title="Return to Home"
+            onPress={() => navigation.navigate('Home')}
+            style={styles.completedBtn}
+          />
+        </View>
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
-      <AppHeader eyebrow={question.category} title={t.quiz} onBack={() => navigation.goBack()} right={<Text style={styles.progress}>{progress}</Text>} />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <AppHeader
+        eyebrow={question.category?.toUpperCase() || 'PRACTICE'}
+        title={t.quiz}
+        onBack={() => navigation.goBack()}
+        right={<Text style={styles.progress}>{progress}</Text>}
+      />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>{question.title}</Text>
         <Text style={styles.prompt}>{question.englishText}</Text>
 
@@ -119,22 +175,33 @@ export default function QuizScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  progress: { color: COLORS.textLight, fontWeight: '900' },
-  title: { fontSize: 30, fontWeight: '900', color: COLORS.ink, marginTop: 24 },
-  prompt: { backgroundColor: COLORS.white, borderRadius: 24, padding: 20, color: COLORS.text, fontSize: 18, lineHeight: 27, marginTop: 18, borderWidth: 1, borderColor: COLORS.border },
+  scrollContent: { paddingBottom: 20 },
+  progress: { color: COLORS.textLight, fontWeight: '900', fontSize: 14 },
+  title: { fontSize: 26, fontWeight: '900', color: COLORS.ink, marginTop: 20 },
+  prompt: { backgroundColor: COLORS.white, borderRadius: 24, padding: 22, color: COLORS.text, fontSize: 17, lineHeight: 26, marginTop: 16, borderWidth: 1, borderColor: COLORS.border },
   options: { marginTop: 20, gap: 12 },
-  option: { backgroundColor: COLORS.white, borderRadius: 18, borderWidth: 1, borderColor: COLORS.border, padding: 17 },
+  option: { backgroundColor: COLORS.white, borderRadius: 18, borderWidth: 1, borderColor: COLORS.border, padding: 18 },
   optionActive: { backgroundColor: COLORS.dark, borderColor: COLORS.dark },
   optionCorrect: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   optionWrong: { backgroundColor: COLORS.error, borderColor: COLORS.error },
   optionText: { color: COLORS.text, fontWeight: '900', fontSize: 16 },
   optionTextActive: { color: COLORS.white },
-  feedback: { borderRadius: 18, padding: 16, marginTop: 18, marginBottom: 16 },
+  feedback: { borderRadius: 18, padding: 18, marginTop: 18, marginBottom: 16 },
   feedbackGood: { backgroundColor: '#E8F6EA' },
   feedbackBad: { backgroundColor: '#FCECEC' },
   feedbackTitle: { color: COLORS.ink, fontWeight: '900', fontSize: 16 },
   feedbackCopy: { color: COLORS.textLight, marginTop: 4 },
-  footer: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 12 },
+  footer: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 14, borderTopWidth: 1, borderTopColor: COLORS.border },
   score: { flex: 1, color: COLORS.ink, fontWeight: '900', fontSize: 16 },
-  action: { flex: 1.4 }
+  action: { flex: 1.4 },
+  completedScreen: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.surface },
+  completedCard: { width: '90%', backgroundColor: COLORS.white, borderRadius: 28, borderWidth: 1, borderColor: COLORS.border, padding: 30, alignItems: 'center', shadowColor: COLORS.ink, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 },
+  completedEmoji: { fontSize: 60, marginBottom: 16 },
+  completedTitle: { color: COLORS.primaryDark, fontSize: 22, fontWeight: '950', letterSpacing: 1 },
+  completedSub: { color: COLORS.textLight, fontSize: 14, textAlign: 'center', marginTop: 8, lineHeight: 20 },
+  resultsGrid: { flexDirection: 'row', gap: 16, marginTop: 24, marginBottom: 28 },
+  resultBox: { flex: 1, backgroundColor: COLORS.muted, borderRadius: 20, padding: 16, alignItems: 'center' },
+  resultLabel: { color: COLORS.textLight, fontSize: 11, fontWeight: '850', letterSpacing: 0.5 },
+  resultValue: { color: COLORS.ink, fontSize: 20, fontWeight: '900', marginTop: 6 },
+  completedBtn: { alignSelf: 'stretch' }
 });

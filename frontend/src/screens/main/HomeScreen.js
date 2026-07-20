@@ -63,30 +63,36 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.roadmap}>
-          {missions.map((item, index) => (
-            <TouchableOpacity
-              key={item[0]}
-              style={[styles.mission, index === 1 && styles.missionActive]}
-              onPress={() => navigation.navigate(item[3])}
-              activeOpacity={0.84}
-            >
-              <View style={styles.node}>
-                <Text style={styles.nodeText}>{index + 1}</Text>
-              </View>
-              <View style={styles.missionCopy}>
-                <Text style={styles.missionTitle}>{item[0]}</Text>
-                <Text style={styles.missionMeta}>{item[1]} | {item[2]}</Text>
-              </View>
-              <Text style={styles.missionArrow}>{'>'}</Text>
-            </TouchableOpacity>
-          ))}
+          {missions.map((item, index) => {
+            const isQuiz = item[3] === 'Quiz';
+            const category = item[0] === 'Grammar exam' ? 'Grammar' : item[0];
+            return (
+              <TouchableOpacity
+                key={item[0]}
+                style={[styles.mission, index === 1 && styles.missionActive]}
+                onPress={() => navigation.navigate(item[3], isQuiz ? { category } : undefined)}
+                activeOpacity={0.84}
+              >
+                <View style={styles.node}>
+                  <Text style={styles.nodeText}>{index + 1}</Text>
+                </View>
+                <View style={styles.missionCopy}>
+                  <Text style={styles.missionTitle}>{item[0]}</Text>
+                  <Text style={styles.missionMeta}>{item[1]} | {item[2]}</Text>
+                </View>
+                <Text style={styles.missionArrow}>{'>'}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <View style={styles.navGrid}>
           <NavButton title={t.quiz} onPress={() => navigation.navigate('Quiz')} />
           <NavButton title={t.chat} onPress={() => navigation.navigate('ChatRoom')} />
           <NavButton title={t.leaderboard} onPress={() => navigation.navigate('Leaderboard')} />
-          <NavButton title={t.admin} onPress={() => navigation.navigate('AdminDashboard')} />
+          {user?.role === 'admin' && (
+            <NavButton title={t.admin} onPress={() => navigation.navigate('AdminDashboard')} />
+          )}
         </View>
 
         <PrimaryButton title="Logout" onPress={handleLogout} variant="dark" style={styles.logoutButton} />

@@ -17,8 +17,10 @@ export default function LoginScreen({ navigation }) {
     setError('');
     setLoading(true);
     const result = await login({ email, password });
-    if (result.demo) {
-      setError(t.demoMode);
+    if (!result.ok) {
+      setError(result.error);
+      setLoading(false);
+      return;
     }
     setLoading(false);
     navigation.replace('Home');

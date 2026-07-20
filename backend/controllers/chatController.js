@@ -9,6 +9,7 @@ async function getMessages(req, res) {
     messages: messages.reverse().map(message => ({
       id: String(message._id),
       user: message.user,
+      userId: message.userId ? String(message.userId) : null,
       text: message.text,
       time: message.time
     }))

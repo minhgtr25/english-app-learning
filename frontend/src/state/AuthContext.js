@@ -65,6 +65,9 @@ export function AuthProvider({ children }) {
       await saveSession(data?.token, data?.user);
       return { ok: true, demo: false };
     } catch (error) {
+      if (error.response) {
+        return { ok: false, error: error.response.data?.message || 'Login failed' };
+      }
       await saveSession('demo-token', { ...DEMO_USER, email: credentials.email });
       return { ok: true, demo: true };
     }
@@ -76,6 +79,9 @@ export function AuthProvider({ children }) {
       await saveSession(data?.token, data?.user);
       return { ok: true, demo: false };
     } catch (error) {
+      if (error.response) {
+        return { ok: false, error: error.response.data?.message || 'Registration failed' };
+      }
       await saveSession('demo-token', {
         ...DEMO_USER,
         fullName: payload.fullName,

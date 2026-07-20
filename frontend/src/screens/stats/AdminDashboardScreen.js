@@ -23,6 +23,7 @@ export default function AdminDashboardScreen({ navigation }) {
   });
   const [notice, setNotice] = useState('');
   const [editingId, setEditingId] = useState(null);
+  const [formError, setFormError] = useState('');
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     title: 'Speaking Warmup',
@@ -58,6 +59,31 @@ export default function AdminDashboardScreen({ navigation }) {
 
   const update = (key, value) => setForm(current => ({ ...current, [key]: value }));
 
+  const buildPayload = () => ({
+    ...form,
+    title: form.title.trim(),
+    category: form.category.trim(),
+    englishText: form.englishText.trim(),
+    correctAnswer: form.correctAnswer.trim(),
+    options: form.options.split(',').map(item => item.trim()).filter(Boolean)
+  });
+
+  const validateForm = payload => {
+    if (!payload.title || !payload.category || !payload.englishText || !payload.correctAnswer) {
+      return 'Please fill title, category, question text and answer.';
+    }
+
+    if (payload.options.length < 2) {
+      return 'Please add at least two options.';
+    }
+
+    if (!payload.options.includes(payload.correctAnswer)) {
+      return 'Correct answer must match one option exactly.';
+    }
+
+    return '';
+  };
+
   const resetForm = () => {
     setEditingId(null);
     setForm({
@@ -83,12 +109,15 @@ export default function AdminDashboardScreen({ navigation }) {
   };
 
   const saveQuestion = async () => {
-    setSaving(true);
-    const payload = {
-      ...form,
-      options: form.options.split(',').map(item => item.trim()).filter(Boolean)
-    };
+    const payload = buildPayload();
+    const validationError = validateForm(payload);
+    setFormError(validationError);
 
+    if (validationError) {
+      return;
+    }
+
+    setSaving(true);
     try {
       if (editingId) {
         const { data } = await api.put(`/questions/${editingId}`, payload);
@@ -176,6 +205,7 @@ export default function AdminDashboardScreen({ navigation }) {
               <TextInput style={styles.input} value={form[key]} onChangeText={value => update(key, value)} />
             </Field>
           ))}
+          {!!formError && <Text style={styles.formError}>{formError}</Text>}
           <PrimaryButton title={editingId ? 'Update' : t.save} onPress={saveQuestion} loading={saving} variant="dark" style={styles.button} />
         </View>
 
@@ -213,6 +243,7 @@ const styles = StyleSheet.create({
   cancelBtn: { backgroundColor: COLORS.muted, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
   cancelText: { color: COLORS.text, fontWeight: '900' },
   input: { backgroundColor: COLORS.muted, borderWidth: 1, borderColor: COLORS.border, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 11, color: COLORS.text },
+  formError: { color: COLORS.error, fontWeight: '800', marginTop: 12 },
   button: { marginTop: 16 },
   bank: { gap: 10, marginBottom: 24 },
   questionRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 18, borderWidth: 1, borderColor: COLORS.border, padding: 14 },

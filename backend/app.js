@@ -58,17 +58,19 @@ function createHttpServer(app) {
       const payload = {
         user: message.user || 'Anonymous',
         text: message.text,
-        time: message.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        time: message.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        userId: message.userId || null
       };
 
+      let savedMessage;
       try {
-        await ChatMessage.create(payload);
+        savedMessage = await ChatMessage.create(payload);
       } catch (error) {
         console.error('Chat save failed:', error.message);
       }
 
       socket.broadcast.emit('chat:message', {
-        id: message.id || String(Date.now()),
+        id: savedMessage ? String(savedMessage._id) : (message.id || String(Date.now())),
         ...payload
       });
     });

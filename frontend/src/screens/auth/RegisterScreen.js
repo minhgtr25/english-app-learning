@@ -18,8 +18,10 @@ export default function RegisterScreen({ navigation }) {
     setNotice('');
     setLoading(true);
     const result = await register({ fullName, email, password });
-    if (result.demo) {
-      setNotice(t.demoMode);
+    if (!result.ok) {
+      setNotice(result.error);
+      setLoading(false);
+      return;
     }
     setLoading(false);
     navigation.replace('Home');
